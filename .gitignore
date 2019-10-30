@@ -1,0 +1,33 @@
+*/.classpath
+*/.project
+*/.settings/
+*/.settings/
+*/.settings/
+*/target/
+*/.scannerwork
+*/.DS_Store
+node_modules
+unpackage/
+dist
+
+*/qqconnect.log*
+*/**/*.orig
+*/**/*Test.java
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

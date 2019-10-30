@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    active: local
+  application:
+    name: zentao-monitor
+
+logging:
+  config: classpath:logback-${spring.profiles.active}.xml
+  home: D:/data/logs/${spring.application.name}
