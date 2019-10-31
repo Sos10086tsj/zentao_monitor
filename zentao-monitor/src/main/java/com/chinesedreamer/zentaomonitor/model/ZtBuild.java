@@ -16,4 +16,7 @@ public class ZtBuild extends BaseModel{
 	
 	@TableField("`date`")
 	private Date date;
+	
+	@TableField("stories")
+	private String stories;
 }

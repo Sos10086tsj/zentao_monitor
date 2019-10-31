@@ -2,6 +2,7 @@ package com.chinesedreamer.zentaomonitor.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +11,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -19,15 +22,18 @@ import com.chinesedreamer.zentaomonitor.comparator.BugVoComparator;
 import com.chinesedreamer.zentaomonitor.comparator.StoryVoComparator;
 import com.chinesedreamer.zentaomonitor.comparator.TaskVoComparator;
 import com.chinesedreamer.zentaomonitor.constant.BugStatus;
+import com.chinesedreamer.zentaomonitor.constant.MonitorConfigType;
 import com.chinesedreamer.zentaomonitor.constant.StoryStage;
 import com.chinesedreamer.zentaomonitor.constant.TaskStatus;
 import com.chinesedreamer.zentaomonitor.dao.DailyReportMapper;
+import com.chinesedreamer.zentaomonitor.dao.MonitorConfigMapper;
 import com.chinesedreamer.zentaomonitor.dao.ZtBugMapper;
 import com.chinesedreamer.zentaomonitor.dao.ZtBuildMapper;
 import com.chinesedreamer.zentaomonitor.dao.ZtStoryMapper;
 import com.chinesedreamer.zentaomonitor.dao.ZtTaskMapper;
 import com.chinesedreamer.zentaomonitor.dao.ZtUserMapper;
 import com.chinesedreamer.zentaomonitor.model.DailyReport;
+import com.chinesedreamer.zentaomonitor.model.MonitorConfig;
 import com.chinesedreamer.zentaomonitor.model.ZtBug;
 import com.chinesedreamer.zentaomonitor.model.ZtBuild;
 import com.chinesedreamer.zentaomonitor.model.ZtStory;
@@ -42,6 +48,8 @@ import com.chinesedreamer.zentaomonitor.vo.TaskVo;
 @Service
 public class ReportServiceImpl implements ReportService{
 	
+	private Logger logger = LoggerFactory.getLogger(ReportServiceImpl.class);
+	
 	@Autowired
 	private DailyReportMapper dailyReportMapper;
 	@Autowired
@@ -54,12 +62,15 @@ public class ReportServiceImpl implements ReportService{
 	private ZtBugMapper ztBugMapper;
 	@Autowired
 	private ZtBuildMapper ztBuildMapper;
+	@Autowired
+	private MonitorConfigMapper monitorConfigMapper;
 	
 	private Map<String, ZtUser> cacheMap;
 	private Map<String, String> notifyUsers = new HashMap<String, String>();
+	private String SEPARATOR = ",";
 	
 	@Override
-	public DailyReportVo getReport(Long id) {
+	public DailyReportVo getDailyReport(Long id) {
 		notifyUsers.clear();
 		
 		DailyReport dailyReport = this.dailyReportMapper.selectById(id);
@@ -76,7 +87,7 @@ public class ReportServiceImpl implements ReportService{
 		Set<Long> storyIds = new HashSet<Long>();
 		if (StringUtils.isNotEmpty(dailyReport.getStories())) {
 			//处理story相关信息
-			String[] storyIdStrs = dailyReport.getStories().split(",");
+			String[] storyIdStrs = dailyReport.getStories().split(SEPARATOR);
 			List<StoryVo> storyVos = new ArrayList<StoryVo>();
 			for (String storyIdStr : storyIdStrs) {
 				// 获取story信息
@@ -99,36 +110,39 @@ public class ReportServiceImpl implements ReportService{
 			vo.setTotalStoryNum(storyIdStrs.length);
 		}
 		
-		//非story tasks
-		List<ZtTask> uncloseTasks = this.getUnclosedTasks(storyIds);
-		List<TaskVo> uncloseTaskVos = uncloseTasks.stream().map(t -> { return convertTask2Vo(t); }).collect(Collectors.toList());
-		uncloseTaskVos.sort(new TaskVoComparator());
-		vo.setOtherUncloseTasks(uncloseTaskVos);
+		//tasks
+		if (StringUtils.isNotEmpty(dailyReport.getTasks())) {
+			if (null == vo.getOtherUncloseTasks()) {
+				vo.setOtherUncloseTasks(new ArrayList<TaskVo>());
+			}
+			String[] taskIdStrs = dailyReport.getTasks().split(SEPARATOR);
+			for (String taskIdStr : taskIdStrs) {
+				Long taskId = Long.parseLong(taskIdStr) + dailyReport.getTaskBaseId().longValue();
+				ZtTask ztTask = this.ztTaskMapper.selectById(taskId);
+				if (!ztTask.getStatus().equals(TaskStatus.CANCEL) && !ztTask.getStatus().equals(TaskStatus.CLOSED)) {
+					vo.getOtherUncloseTasks().add(this.convertTask2Vo(ztTask));
+				}
+				
+			}
+			vo.getOtherUncloseTasks().sort(new TaskVoComparator());
+		}
 		
 		//bug
 		vo.setTotalVersionBugNum(0);
 		vo.setTotalVersionUncloseBugNum(0);
-		List<ZtBug> ztBugs = this.getBugsByBuildId(dailyReport.getBuildId());
-		if (!CollectionUtils.isEmpty(ztBugs)) {
-			vo.setTotalVersionBugNum(ztBugs.size());
+		if (StringUtils.isNotEmpty(dailyReport.getBugs())) {
 			if (null == vo.getUncloseBugs()) {
 				vo.setUncloseBugs(new ArrayList<BugVo>());
 			}
-			for (ZtBug ztBug : ztBugs) {
-				if (!ztBug.getStatus().equals(BugStatus.closed)) {
-					vo.setTotalVersionUncloseBugNum(vo.getTotalVersionUncloseBugNum() + 1);
-					BugVo bugVo = this.convertBug2Vo(ztBug);
-					vo.getUncloseBugs().add(bugVo);
+			String[] bugIdStrs = dailyReport.getBugs().split(SEPARATOR);
+			for (String bugIdStr : bugIdStrs) {
+				Long bugId = Long.parseLong(bugIdStr) + dailyReport.getBugBaseId().longValue();
+				ZtBug ztBug = this.ztBugMapper.selectById(bugId);
+				if (!ztBug.getStatus().equals(BugStatus.CLOSED)) {
+					vo.getUncloseBugs().add(this.convertBug2Vo(ztBug));
 				}
 			}
 			vo.getUncloseBugs().sort(new BugVoComparator());
-		}
-		
-		if (!this.notifyUsers.isEmpty()) {
-			vo.setNotifyMobiles(new ArrayList<String>());
-			for (String key : this.notifyUsers.keySet()) {
-				vo.getNotifyMobiles().add(this.notifyUsers.get(key));
-			}
 		}
 		return vo;
 	}
@@ -205,5 +219,77 @@ public class ReportServiceImpl implements ReportService{
 		bugVo.setTitle(ztBug.getTitle());
 		bugVo.setAssignedTo(this.getUserRealname(ztBug.getAssignedTo()));
 		return bugVo;
+	}
+
+	@Override
+	public void generateDailyReport() {
+		QueryWrapper<MonitorConfig> queryWrapper = new QueryWrapper<MonitorConfig>();
+		queryWrapper.eq("config_type", MonitorConfigType.DAILY_REPORT);
+		MonitorConfig config = this.monitorConfigMapper.selectOne(queryWrapper);
+		if (null == config) {
+			this.logger.info("missing config");
+			return;
+		}
+		String[] buildIdStrs = config.getConfigValue().split(SEPARATOR);
+		for (String buildIdStr : buildIdStrs) {
+			DailyReport dailyReport = new DailyReport();
+			
+			ZtBuild ztBuild = this.ztBuildMapper.selectById(Long.parseLong(buildIdStr));
+			dailyReport.setBuildId(Long.parseLong(buildIdStr));
+			dailyReport.setReportDate(new Date());
+			dailyReport.setReportTitle("[DailyReport]" + ztBuild.getName());
+			
+			//处理story信息
+			if (StringUtils.isNotEmpty(ztBuild.getStories())) {
+				String[] sotryIdStrs = ztBuild.getStories().split(SEPARATOR);
+				List<Long> sotryIds = new ArrayList<Long>();
+				for (String sotryIdStr : sotryIdStrs) {
+					if (StringUtils.isNotEmpty(sotryIdStr)) {
+						sotryIds.add(Long.parseLong(sotryIdStr));
+					}
+				}
+				dailyReport.setStoryBaseId(this.getBaseId(sotryIds));
+				dailyReport.setStories(this.convert2CommaStr(sotryIds, dailyReport.getStoryBaseId()));
+			}
+			//处理task信息
+			List<ZtTask> ztTasks = this.getUnclosedTasks(null);
+			if (!CollectionUtils.isEmpty(ztTasks)) {
+				List<Long> taskIds = ztTasks.stream().map(t -> { return t.getId(); } ).collect(Collectors.toList());
+				dailyReport.setTaskBaseId(this.getBaseId(taskIds));
+				dailyReport.setTasks(this.convert2CommaStr(taskIds, dailyReport.getTaskBaseId()));
+			}
+			//处理bug信息
+			List<ZtBug> ztBugs = this.getBugsByBuildId(ztBuild.getId());
+			if (!CollectionUtils.isEmpty(ztBugs)) {
+				List<Long> bugIds = ztBugs.stream().map(t -> { return t.getId(); } ).collect(Collectors.toList());
+				dailyReport.setBugBaseId(this.getBaseId(bugIds));
+				dailyReport.setBugs(this.convert2CommaStr(bugIds, dailyReport.getBugBaseId()));
+			}
+			this.dailyReportMapper.insert(dailyReport);
+		}
+	}
+	
+	private int getBaseId(List<Long> ids) {
+		if (CollectionUtils.isEmpty(ids)) {
+			return 0;
+		}
+		Long tmp = -1l;
+		for (Long id : ids) {
+			if (tmp == -1 || id < tmp) {
+				tmp = id;
+			}
+		}
+		return tmp.intValue() - 1;
+	}
+	
+	private String convert2CommaStr(List<Long> ids, Integer baseId) {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < ids.size(); i++) {
+			builder.append(ids.get(i).intValue() - baseId);
+			if (i != ids.size() - 1) {
+				builder.append(SEPARATOR);
+			}
+		}
+		return builder.toString();
 	}
 }

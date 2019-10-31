@@ -3,9 +3,9 @@ package com.chinesedreamer.zentaomonitor.constant;
 import com.baomidou.mybatisplus.annotation.EnumValue;
 
 public enum BugStatus {
-	active("active", "激活"),
-	resolved("resolved", "已解决"),
-	closed("closed", "已关闭");
+	ACTIVE("active", "激活"),
+	RESOLVED("resolved", "已解决"),
+	CLOSED("closed", "已关闭");
 	
 	@EnumValue
 	private final String status;

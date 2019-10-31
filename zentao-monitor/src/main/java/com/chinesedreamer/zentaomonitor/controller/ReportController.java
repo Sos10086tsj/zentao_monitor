@@ -25,6 +25,13 @@ public class ReportController {
 	@RequestMapping(value = "daily/{id}", method = {RequestMethod.GET, RequestMethod.POST}, produces = "application/json; charset=UTF-8")
 	@ResponseBody
 	public ResponseVo getDailyReport(@PathVariable("id") Long id) {
-		return ResponseVo.success(this.reportService.getReport(id));
+		return ResponseVo.success(this.reportService.getDailyReport(id));
+	}
+	
+	@RequestMapping(value = "daily/execute", method = {RequestMethod.GET, RequestMethod.POST}, produces = "application/json; charset=UTF-8")
+	@ResponseBody
+	public ResponseVo executeDailyReport() {
+		this.reportService.generateDailyReport();
+		return ResponseVo.success();
 	}
 }
