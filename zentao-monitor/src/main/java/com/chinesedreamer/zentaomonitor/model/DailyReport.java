@@ -19,6 +19,9 @@ public class DailyReport extends BaseModel{
 	@TableField("report_title")
 	private String reportTitle;
 	
+	@TableField("build_id")
+	private Long buildId;
+	
 	@TableField("story_base_id")
 	private Integer storyBaseId;
 	

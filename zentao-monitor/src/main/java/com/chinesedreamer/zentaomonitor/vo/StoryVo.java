@@ -12,5 +12,5 @@ public class StoryVo {
 	private Integer priority;
 	private String stage;
 	
-	private List<TaskVo> tasks;
+	private List<TaskVo> unCloseTasks;
 }

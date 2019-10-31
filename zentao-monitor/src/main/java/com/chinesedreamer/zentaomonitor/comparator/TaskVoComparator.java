@@ -8,8 +8,7 @@ public class TaskVoComparator implements Comparator<TaskVo>{
 
 	@Override
 	public int compare(TaskVo o1, TaskVo o2) {
-		
-		return 0;
+		return o1.getAssignTo().compareTo(o2.getAssignTo());
 	}
 
 }
