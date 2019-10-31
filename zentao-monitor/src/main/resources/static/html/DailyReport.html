@@ -69,22 +69,11 @@
 		<div>
 			<div class="subTitle">需求清单</div>
 			<el-table :data="D_REPORT.stories" type="expand" max-height="500">
-<!-- 				<el-table-column type="expand"> -->
-<!-- 					<template slot-scope="props"> -->
-<!-- 						<span v-if="props.row.unCloseTasks.length <= 0">没有任务</span> -->
-<!-- 						<el-table v-else :data="props.row.unCloseTasks"> -->
-<!-- 							<el-table-column prop="id" label="编号"></el-table-column> -->
-<!-- 							<el-table-column prop="name" label="任务名称"></el-table-column> -->
-<!-- 							<el-table-column prop="priorityName" label="优先级"></el-table-column> -->
-<!-- 							<el-table-column prop="deadline" label="截止日期"></el-table-column> -->
-<!-- 							<el-table-column prop="statusName" label="状态"></el-table-column> -->
-<!-- 							<el-table-column prop="assignTo" label="指派给"></el-table-column> -->
-<!-- 						</el-table> -->
-<!-- 					</template> -->
-<!-- 				</el-table-column> -->
-
-				<el-table-column prop="id" label="编号" width="60"></el-table-column>
-				<el-table-column prop="title" label="需求名称"></el-table-column>
+				<el-table-column label="需求名称">
+					<template slot-scope="scope">
+						<el-link type="primary" :href="scope.row.url" target="_blank">{{'[' + scope.row.id + ']' + scope.row.title}}</el-link>
+					</template>
+				</el-table-column>
 				<el-table-column prop="priority" label="优先级" width="80"></el-table-column>
 				<el-table-column prop="stage" label="阶段" width="100"></el-table-column>
 			</el-table>
@@ -93,8 +82,11 @@
 		<div>
 			<div class="subTitle">未完成任务清单</div>
 			<el-table :data="D_REPORT.otherUncloseTasks" max-height="500">
-				<el-table-column prop="id" label="编号" width="60"></el-table-column>
-				<el-table-column prop="name" label="任务名称"></el-table-column>
+				<el-table-column label="任务名称">
+					<template slot-scope="scope">
+						<el-link type="primary" :href="scope.row.url" target="_blank">{{'[' + scope.row.id + ']' + scope.row.name}}</el-link>
+					</template>
+				</el-table-column>
 				<el-table-column prop="priorityName" label="优先级" width="100"></el-table-column>
 				<el-table-column prop="deadline" label="截止日期" width="120"></el-table-column>
 				<el-table-column prop="statusName" label="状态" width="100"></el-table-column>
@@ -105,8 +97,11 @@
 		<div>
 			<div class="subTitle">Bug清单</div>
 			<el-table :data="D_REPORT.uncloseBugs" max-height="500">
-				<el-table-column prop="id" label="编号" width="60"></el-table-column>
-				<el-table-column prop="title" label="Bug描述"></el-table-column>
+				<el-table-column label="Bug描述">
+					<template slot-scope="scope">
+						<el-link type="primary" :href="scope.row.url" target="_blank">{{'[' + scope.row.id + ']' + scope.row.title}}</el-link>
+					</template>
+				</el-table-column>
 				<el-table-column prop="priority" label="优先级" width="100"></el-table-column>
 				<el-table-column prop="status" label="状态" width="100"></el-table-column>
 				<el-table-column prop="assignedTo" label="指派给" width="100"></el-table-column>

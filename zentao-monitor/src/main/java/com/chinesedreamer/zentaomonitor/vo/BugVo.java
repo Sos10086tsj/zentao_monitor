@@ -1,9 +1,11 @@
 package com.chinesedreamer.zentaomonitor.vo;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class BugVo {
+@EqualsAndHashCode(callSuper = false)
+public class BugVo extends BaseZtVo{
 
 	private Long id;
 	private String title;

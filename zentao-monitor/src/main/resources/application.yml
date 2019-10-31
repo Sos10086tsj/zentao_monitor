@@ -44,3 +44,9 @@ mybatis-plus:
   typeEnumsPackage: com.chinesedreamer.zentaomonitor.constant
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    
+app:
+  zentao:
+    sotryUrl: story-view-{0}.html
+    taskUrl: task-view-{0}.html
+    bugUrl: bug-view-{0}.html

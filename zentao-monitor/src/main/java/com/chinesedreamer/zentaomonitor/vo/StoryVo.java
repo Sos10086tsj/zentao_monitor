@@ -3,9 +3,11 @@ package com.chinesedreamer.zentaomonitor.vo;
 import java.util.List;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class StoryVo {
+@EqualsAndHashCode(callSuper = false)
+public class StoryVo extends BaseZtVo{
 
 	private Long id;
 	private String title;

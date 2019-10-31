@@ -1,5 +1,6 @@
 package com.chinesedreamer.zentaomonitor.service.impl;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -21,6 +22,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.chinesedreamer.zentaomonitor.comparator.BugVoComparator;
 import com.chinesedreamer.zentaomonitor.comparator.StoryVoComparator;
 import com.chinesedreamer.zentaomonitor.comparator.TaskVoComparator;
+import com.chinesedreamer.zentaomonitor.config.AppProperties;
 import com.chinesedreamer.zentaomonitor.constant.BugStatus;
 import com.chinesedreamer.zentaomonitor.constant.MonitorConfigType;
 import com.chinesedreamer.zentaomonitor.constant.StoryStage;
@@ -64,6 +66,8 @@ public class ReportServiceImpl implements ReportService{
 	private ZtBuildMapper ztBuildMapper;
 	@Autowired
 	private MonitorConfigMapper monitorConfigMapper;
+	@Autowired
+	private AppProperties appProperties;
 	
 	private Map<String, ZtUser> cacheMap;
 	private Map<String, String> notifyUsers = new HashMap<String, String>();
@@ -153,6 +157,7 @@ public class ReportServiceImpl implements ReportService{
 		vo.setTitle(ztStory.getTitle());
 		vo.setPriority(ztStory.getPriority().getPriority());
 		vo.setStage(ztStory.getStage().getDesc());
+		vo.setUrl(this.convertUrl(this.appProperties.getZentaoBaseUrl() + this.appProperties.getZentaoSotryUrl(), ztStory.getId()));
 		return vo;
 	}
 	
@@ -166,6 +171,7 @@ public class ReportServiceImpl implements ReportService{
 		vo.setDeadline(ztTask.getDeadline());
 		vo.setStatusName(ztTask.getStatus().getDesc());
 		vo.setAssignTo(this.getUserRealname(ztTask.getAssignedTo()));
+		vo.setUrl(this.convertUrl(this.appProperties.getZentaoBaseUrl() + this.appProperties.getZentaoTaskUrl(), ztTask.getId()));
 		return vo;
 	}
 	
@@ -218,6 +224,7 @@ public class ReportServiceImpl implements ReportService{
 		bugVo.setStatus(ztBug.getStatus().getDesc());
 		bugVo.setTitle(ztBug.getTitle());
 		bugVo.setAssignedTo(this.getUserRealname(ztBug.getAssignedTo()));
+		bugVo.setUrl(this.convertUrl(this.appProperties.getZentaoBaseUrl() + this.appProperties.getZentaoBugUrl(), ztBug.getId()));
 		return bugVo;
 	}
 
@@ -291,5 +298,10 @@ public class ReportServiceImpl implements ReportService{
 			}
 		}
 		return builder.toString();
+	}
+	
+	private String convertUrl(String template, Object... objects) {
+		MessageFormat messageFormat = new MessageFormat(template);
+		return messageFormat.format(objects);
 	}
 }

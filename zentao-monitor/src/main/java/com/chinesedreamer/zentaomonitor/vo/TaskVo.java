@@ -6,9 +6,11 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class TaskVo {
+@EqualsAndHashCode(callSuper = false)
+public class TaskVo extends BaseZtVo{
 	private Long id;
 	private Boolean isSub;
 	private String name;
