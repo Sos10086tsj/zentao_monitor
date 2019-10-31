@@ -23,6 +23,7 @@
 		<druid-spring-boot-starter.version>1.1.10</druid-spring-boot-starter.version>
 		<mybatis-spring-boot-starter.version>2.0.1</mybatis-spring-boot-starter.version>
 		<mybatis-plus.version>3.0.7.1</mybatis-plus.version>
+		<build.final.name>zentao-monitor</build.final.name>
 	</properties>
 
 	<dependencies>
@@ -101,4 +102,28 @@
 			<version>${mybatis-plus.version}</version>
 		</dependency>
 	</dependencies>
+	
+	<build>
+		<finalName>${build.final.name}</finalName>
+		<resources>
+			<resource>
+				<directory>src/main/resources/</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+							<goal>build-info</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

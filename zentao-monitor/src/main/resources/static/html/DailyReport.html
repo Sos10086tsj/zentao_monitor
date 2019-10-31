@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="../css/elementui.css">
+<title>禅道每日报表</title>
+<style type="text/css">
+.head .title{
+	text-align: center;
+	margin-top: 50px;
+}
+.head .title .main_title{
+	font-weight: 700;
+	font-size: 36px;
+}
+.head .title .sub_title{
+	font-size: 18px;
+}
+.head .summary{
+	margin-top: 50px;
+	text-align: center;
+}
+.head .summary .el-form-item{
+	padding: 0 50px 0 50px;
+}
+.head .summary .el-form-item .el-form-item__label{
+	color: #B7B7B7;
+    font-size: 18px;
+    font-weight: 500;
+}
+.head .summary .el-form-item .el-form-item__content{
+	color: #EE3B3B;
+    font-size: 18px;
+    font-weight: 700;
+}
+.head .subTitle{
+	text-align: center;
+    font-size: 26px;
+    color: #8B2323;
+}
+</style>
+</head>
+<body>
+<div id="app">
+	<el-container style="border: 1px solid #eee" >
+	<el-main>
+	
+	<div class="head">
+		<div class="title">
+			<span class="main_title">{{D_REPORT.reportTitle}} - （打包：{{D_REPORT.buildDate}}）</span>
+			<span class="sub_title">（{{D_REPORT.reportDate}}）</span>
+		</div>
+		<el-divider></el-divider>
+		<div class="summary">
+			<el-form :inline="true" ref="form">
+				<el-form-item label="未完成/总需求">
+    				<label>{{D_REPORT.processingStoryNum + '/' + D_REPORT.totalStoryNum}}</label>
+  				</el-form-item>
+  				<el-form-item label="其它未完成任务">
+    				<label>{{D_REPORT.otherUncloseTasks.length}}</label>
+  				</el-form-item>
+  				<el-form-item label="未关闭/总Bug">
+    				<label>{{D_REPORT.totalVersionUncloseBugNum + '/' + D_REPORT.totalVersionBugNum}}</label>
+  				</el-form-item>
+			</el-form>
+		</div>
+		<el-divider></el-divider>
+		<div>
+			<div class="subTitle">需求清单</div>
+			<el-table :data="D_REPORT.stories" type="expand" max-height="500">
+<!-- 				<el-table-column type="expand"> -->
+<!-- 					<template slot-scope="props"> -->
+<!-- 						<span v-if="props.row.unCloseTasks.length <= 0">没有任务</span> -->
+<!-- 						<el-table v-else :data="props.row.unCloseTasks"> -->
+<!-- 							<el-table-column prop="id" label="编号"></el-table-column> -->
+<!-- 							<el-table-column prop="name" label="任务名称"></el-table-column> -->
+<!-- 							<el-table-column prop="priorityName" label="优先级"></el-table-column> -->
+<!-- 							<el-table-column prop="deadline" label="截止日期"></el-table-column> -->
+<!-- 							<el-table-column prop="statusName" label="状态"></el-table-column> -->
+<!-- 							<el-table-column prop="assignTo" label="指派给"></el-table-column> -->
+<!-- 						</el-table> -->
+<!-- 					</template> -->
+<!-- 				</el-table-column> -->
+
+				<el-table-column prop="id" label="编号" width="60"></el-table-column>
+				<el-table-column prop="title" label="需求名称"></el-table-column>
+				<el-table-column prop="priority" label="优先级" width="80"></el-table-column>
+				<el-table-column prop="stage" label="阶段" width="100"></el-table-column>
+			</el-table>
+		</div>
+		<el-divider></el-divider>
+		<div>
+			<div class="subTitle">未完成任务清单</div>
+			<el-table :data="D_REPORT.otherUncloseTasks" max-height="500">
+				<el-table-column prop="id" label="编号" width="60"></el-table-column>
+				<el-table-column prop="name" label="任务名称"></el-table-column>
+				<el-table-column prop="priorityName" label="优先级" width="100"></el-table-column>
+				<el-table-column prop="deadline" label="截止日期" width="120"></el-table-column>
+				<el-table-column prop="statusName" label="状态" width="100"></el-table-column>
+				<el-table-column prop="assignTo" label="指派给" width="100"></el-table-column>
+			</el-table>
+		</div>
+		<el-divider></el-divider>
+		<div>
+			<div class="subTitle">Bug清单</div>
+			<el-table :data="D_REPORT.uncloseBugs" max-height="500">
+				<el-table-column prop="id" label="编号" width="60"></el-table-column>
+				<el-table-column prop="title" label="Bug描述"></el-table-column>
+				<el-table-column prop="priority" label="优先级" width="100"></el-table-column>
+				<el-table-column prop="status" label="状态" width="100"></el-table-column>
+				<el-table-column prop="assignedTo" label="指派给" width="100"></el-table-column>
+			</el-table>
+		</div>
+	</div>
+	
+	</el-main>
+	</el-container>
+	
+</div>
+</body>
+<script type="text/javascript" src="../js/vue.js"></script>
+<script type="text/javascript" src="../js/elementui.js"></script>
+<script type="text/javascript" src="../js/axios.min.js"></script>
+<script type="text/javascript" src="../js/common.js"></script>
+<script>
+new Vue({
+	el: '#app',
+	data(){
+		return {
+			D_REPORT: {
+				reportTitle: '',
+				buildDate: null,
+				reportDate: null,
+				totalStoryNum: 0,
+				processingStoryNum: 0,
+				stories: [
+					{
+						otherUncloseTasks: []
+					}
+				],
+				otherUncloseTasks: [],
+				totalVersionBugNum: 0,
+				totalVersionUncloseBugNum: 0,
+				uncloseBugs: []
+			}
+		}	
+	},
+	created(){
+		this.loadData();
+	},
+	methods:{
+		loadData(){
+			let _this = this;
+			let parameterMap = getUrlParameterMap();
+			axios.get('/report/daily/' + parameterMap.id)
+				.then(function (response) {
+					if(response.data.success == false){
+						_this.$message.error(response.errorMessage);
+					}else{
+						_this.D_REPORT = response.data.data
+					}
+				}).catch(function (error) {
+					_this.$message.error('数据加载失败');
+				});
+		}
+	}
+})
+</script>
+</html>

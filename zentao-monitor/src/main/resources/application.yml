@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: local
   messages:
     basename: message/message
   #gzip压缩配置
@@ -6,20 +8,6 @@ spring:
     enabled: true
     mime-types: application/json ,application/xml,text/html,text/xml,text/plain
     min-response-size: 2048 #默认就是2048 byte
-
-server:
-  port: 8091
-  servlet:
-    context-path: /
-
-      
-mybatis-plus:
-  mapper-locations: classpath:com/chinesedreamer/zentaomonitor/dao/*Mapper.xml
-  typeEnumsPackage: com.chinesedreamer.zentaomonitor.constant
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-    
-spring:
   datasource:
     url: jdbc:mysql://localhost:3306/dbname?useUnicode=true&characterEncoding=UTF-8&relaxAutoCommit=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&useSSL=false
     username: root
@@ -44,3 +32,15 @@ spring:
       stat-view-servlet:
         login-username: admin
         login-password: admin
+
+server:
+  port: 8091
+  servlet:
+    context-path: /
+
+      
+mybatis-plus:
+  mapper-locations: classpath:com/chinesedreamer/zentaomonitor/dao/*Mapper.xml
+  typeEnumsPackage: com.chinesedreamer.zentaomonitor.constant
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

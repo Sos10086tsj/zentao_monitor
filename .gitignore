@@ -31,3 +31,4 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+zentao-monitor/src/main/resources/application-local.yml

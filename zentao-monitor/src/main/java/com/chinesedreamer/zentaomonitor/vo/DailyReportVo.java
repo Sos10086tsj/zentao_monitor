@@ -3,13 +3,18 @@ package com.chinesedreamer.zentaomonitor.vo;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Data;
 
 @Data
 public class DailyReportVo {
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date reportDate;	//报表时间
 	private String reportTitle;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	private Date buildDate;
 	
 	private Integer totalStoryNum;		//总需求数
 	private Integer processingStoryNum;	//未完成需求数

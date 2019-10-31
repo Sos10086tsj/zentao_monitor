@@ -11,7 +11,7 @@ import com.chinesedreamer.zentaomonitor.service.ReportService;
 import com.chinesedreamer.zentaomonitor.vo.ResponseVo;
 
 @RestController
-@RequestMapping("")
+@RequestMapping("report")
 public class ReportController {
 	
 	@Autowired

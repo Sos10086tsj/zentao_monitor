@@ -16,17 +16,20 @@ import org.springframework.util.CollectionUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.chinesedreamer.zentaomonitor.comparator.BugVoComparator;
+import com.chinesedreamer.zentaomonitor.comparator.StoryVoComparator;
 import com.chinesedreamer.zentaomonitor.comparator.TaskVoComparator;
 import com.chinesedreamer.zentaomonitor.constant.BugStatus;
 import com.chinesedreamer.zentaomonitor.constant.StoryStage;
 import com.chinesedreamer.zentaomonitor.constant.TaskStatus;
 import com.chinesedreamer.zentaomonitor.dao.DailyReportMapper;
 import com.chinesedreamer.zentaomonitor.dao.ZtBugMapper;
+import com.chinesedreamer.zentaomonitor.dao.ZtBuildMapper;
 import com.chinesedreamer.zentaomonitor.dao.ZtStoryMapper;
 import com.chinesedreamer.zentaomonitor.dao.ZtTaskMapper;
 import com.chinesedreamer.zentaomonitor.dao.ZtUserMapper;
 import com.chinesedreamer.zentaomonitor.model.DailyReport;
 import com.chinesedreamer.zentaomonitor.model.ZtBug;
+import com.chinesedreamer.zentaomonitor.model.ZtBuild;
 import com.chinesedreamer.zentaomonitor.model.ZtStory;
 import com.chinesedreamer.zentaomonitor.model.ZtTask;
 import com.chinesedreamer.zentaomonitor.model.ZtUser;
@@ -49,6 +52,8 @@ public class ReportServiceImpl implements ReportService{
 	private ZtUserMapper ztUserMapper;
 	@Autowired
 	private ZtBugMapper ztBugMapper;
+	@Autowired
+	private ZtBuildMapper ztBuildMapper;
 	
 	private Map<String, ZtUser> cacheMap;
 	private Map<String, String> notifyUsers = new HashMap<String, String>();
@@ -62,6 +67,8 @@ public class ReportServiceImpl implements ReportService{
 		DailyReportVo vo = new DailyReportVo();
 		vo.setReportDate(dailyReport.getReportDate());
 		vo.setReportTitle(dailyReport.getReportTitle());
+		ZtBuild ztBuild = this.ztBuildMapper.selectById(dailyReport.getBuildId());
+		vo.setBuildDate(ztBuild.getDate());
 		
 		//story
 		vo.setTotalStoryNum(0);
@@ -77,16 +84,17 @@ public class ReportServiceImpl implements ReportService{
 				ZtStory ztStory = this.ztStoryMapper.selectById(storyId);
 				StoryVo storyVo = this.convertStory2Vo(ztStory);
 				// 获取story关联的任务信息
-				List<ZtTask> ztTasks = this.getTasksByStoryId(storyId);
-				List<TaskVo> taskVos = ztTasks.stream().map(t -> { return convertTask2Vo(t); }).collect(Collectors.toList());
-				taskVos.sort(new TaskVoComparator());
-				storyVo.setUnCloseTasks(taskVos);
+//				List<ZtTask> ztTasks = this.getTasksByStoryId(storyId);
+//				List<TaskVo> taskVos = ztTasks.stream().map(t -> { return convertTask2Vo(t); }).collect(Collectors.toList());
+//				taskVos.sort(new TaskVoComparator());
+//				storyVo.setUnCloseTasks(taskVos);
 				storyVos.add(storyVo);
 				if (!ztStory.getStage().equals(StoryStage.CLOSED)) {
 					vo.setProcessingStoryNum(vo.getProcessingStoryNum() + 1);
 				}
 				storyIds.add(Long.parseLong(storyIdStr));
 			}
+			storyVos.sort(new StoryVoComparator());
 			vo.setStories(storyVos);
 			vo.setTotalStoryNum(storyIdStrs.length);
 		}
@@ -147,13 +155,13 @@ public class ReportServiceImpl implements ReportService{
 		return vo;
 	}
 	
-	private List<ZtTask> getTasksByStoryId(Long storyId) {
-		QueryWrapper<ZtTask> queryWrapper = new QueryWrapper<ZtTask>();
-		queryWrapper.eq("story", storyId);
-		queryWrapper.eq("deleted", "0");
-		queryWrapper.notIn("status", Arrays.asList(TaskStatus.CANCEL, TaskStatus.CLOSED));
-		return this.ztTaskMapper.selectList(queryWrapper);
-	}
+//	private List<ZtTask> getTasksByStoryId(Long storyId) {
+//		QueryWrapper<ZtTask> queryWrapper = new QueryWrapper<ZtTask>();
+//		queryWrapper.eq("story", storyId);
+//		queryWrapper.eq("deleted", "0");
+//		queryWrapper.notIn("status", Arrays.asList(TaskStatus.CANCEL, TaskStatus.CLOSED, TaskStatus.DONE));
+//		return this.ztTaskMapper.selectList(queryWrapper);
+//	}
 	
 	private String getUserRealname(String account) {
 		if (account.equals("closed")) {
@@ -176,9 +184,9 @@ public class ReportServiceImpl implements ReportService{
 	
 	private List<ZtTask> getUnclosedTasks(Set<Long> storyIds) {
 		QueryWrapper<ZtTask> queryWrapper = new QueryWrapper<ZtTask>();
-		queryWrapper.notIn("story", storyIds);
+//		queryWrapper.notIn("story", storyIds);
 		queryWrapper.eq("deleted", "0");
-		queryWrapper.ne("status", TaskStatus.CLOSED);
+		queryWrapper.notIn("status", Arrays.asList(TaskStatus.CANCEL, TaskStatus.CLOSED, TaskStatus.DONE));
 		return this.ztTaskMapper.selectList(queryWrapper);
 	}
 	
