@@ -1,3 +1,4 @@
+let ctx = '/monitor'
 function getUrlParameterMap(){
 	let url = location.href;
 	let index = url.indexOf("?");

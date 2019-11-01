@@ -148,7 +148,7 @@ new Vue({
 		loadData(){
 			let _this = this;
 			let parameterMap = getUrlParameterMap();
-			axios.get('/report/daily/' + parameterMap.id)
+			axios.get(ctx + '/report/daily/' + parameterMap.id)
 				.then(function (response) {
 					if(response.data.success == false){
 						_this.$message.error(response.errorMessage);
