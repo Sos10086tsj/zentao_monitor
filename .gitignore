@@ -32,3 +32,4 @@ yarn-error.log*
 *.sln
 *.sw?
 zentao-monitor/src/main/resources/application-local.yml
+zentao-monitor/src/main/resources/application-prod.yml
