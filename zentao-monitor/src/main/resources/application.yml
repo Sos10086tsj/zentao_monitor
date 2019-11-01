@@ -1,6 +1,8 @@
 spring:
   profiles:
     active: local
+  application:
+    name: zentao-monitor
   messages:
     basename: message/message
   #gzip压缩配置
