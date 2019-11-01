@@ -1,8 +1,7 @@
-基于禅道+钉钉的简易监控系统，采用Springboot + Vue + ElementUI框架。
-项目开箱即用，配置文件查看application.yml，需要自定义的配置参数如下：
-
+基于禅道+钉钉的简易监控系统，采用Springboot + Vue + ElementUI框架。  
+项目开箱即用，配置文件查看application.yml，需要自定义的配置参数如下：  
 spring:
-  profiles: {{profileName}}
+    profiles: {{profileName}}
   datasource:
     url: {{db link url}}
     username: {{db username}}
