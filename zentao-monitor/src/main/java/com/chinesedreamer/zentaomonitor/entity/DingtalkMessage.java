@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class DingtalkMessage {
 
-	private String url;
-	private String description;
+	private String title;
+	private String text;
 	private List<String> notifyMobiles;
 }

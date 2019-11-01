@@ -21,4 +21,13 @@ public class AppProperties {
 	
 	@Value("${app.zentao.bugUrl}")
 	private String zentaoBugUrl;
+	
+	@Value("${app.zentao.dailyReportUrl}")
+	private String zentaoDailyReportUrl;
+	
+	@Value("${app.zentao.dailyReportPicUrl}")
+	private String zentaoDailyReportPicUrl;
+	
+	@Value("${app.dingtalk.accessToken}")
+	private String dingTalkAccessToken;
 }

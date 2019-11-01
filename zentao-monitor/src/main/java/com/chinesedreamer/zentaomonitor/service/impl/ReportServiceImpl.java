@@ -34,6 +34,7 @@ import com.chinesedreamer.zentaomonitor.dao.ZtBuildMapper;
 import com.chinesedreamer.zentaomonitor.dao.ZtStoryMapper;
 import com.chinesedreamer.zentaomonitor.dao.ZtTaskMapper;
 import com.chinesedreamer.zentaomonitor.dao.ZtUserMapper;
+import com.chinesedreamer.zentaomonitor.entity.DingtalkMessage;
 import com.chinesedreamer.zentaomonitor.model.DailyReport;
 import com.chinesedreamer.zentaomonitor.model.MonitorConfig;
 import com.chinesedreamer.zentaomonitor.model.ZtBug;
@@ -41,6 +42,7 @@ import com.chinesedreamer.zentaomonitor.model.ZtBuild;
 import com.chinesedreamer.zentaomonitor.model.ZtStory;
 import com.chinesedreamer.zentaomonitor.model.ZtTask;
 import com.chinesedreamer.zentaomonitor.model.ZtUser;
+import com.chinesedreamer.zentaomonitor.service.DingtalkSenderService;
 import com.chinesedreamer.zentaomonitor.service.ReportService;
 import com.chinesedreamer.zentaomonitor.vo.BugVo;
 import com.chinesedreamer.zentaomonitor.vo.DailyReportVo;
@@ -68,6 +70,8 @@ public class ReportServiceImpl implements ReportService{
 	private MonitorConfigMapper monitorConfigMapper;
 	@Autowired
 	private AppProperties appProperties;
+	@Autowired
+	private DingtalkSenderService dingtalkSenderService;
 	
 	private Map<String, ZtUser> cacheMap;
 	private Map<String, String> notifyUsers = new HashMap<String, String>();
@@ -273,6 +277,20 @@ public class ReportServiceImpl implements ReportService{
 				dailyReport.setBugs(this.convert2CommaStr(bugIds, dailyReport.getBugBaseId()));
 			}
 			this.dailyReportMapper.insert(dailyReport);
+			
+			DingtalkMessage message = new DingtalkMessage();
+//			message.setUrl(this.appProperties.getZentaoDailyReportUrl() + dailyReport.getId());
+//			message.setPicUrl(this.appProperties.getZentaoDailyReportPicUrl());
+			message.setTitle("[" + ztBuild.getName() + "]版本进度报告");
+			message.setText(
+					"### [" + ztBuild.getName() + "版本进度报告](" + this.appProperties.getZentaoDailyReportUrl() + dailyReport.getId() + ")\n"
+					+ "请大家及时完成自己的任务和bug。");
+			List<String> notifyMobiles = new ArrayList<String>();
+			for (String key : this.notifyUsers.keySet()) {
+				notifyMobiles.add(this.notifyUsers.get(key));
+			}
+			message.setNotifyMobiles(notifyMobiles);
+			this.dingtalkSenderService.sendMessage(message);
 		}
 	}
 	
