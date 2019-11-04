@@ -15,7 +15,7 @@ public class DailyReportTask {
 	@Autowired
 	private ReportService reportService;
 
-	@Scheduled(cron = "0 30 12/18 ? * *")
+	@Scheduled(cron = "0 30 12,18 ? * MON-FRI")
 	public void generateReport() {
 		this.logger.info("--------- start ----------");
 		this.reportService.generateDailyReport();

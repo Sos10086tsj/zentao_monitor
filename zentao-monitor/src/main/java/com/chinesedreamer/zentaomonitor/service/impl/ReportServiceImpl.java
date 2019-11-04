@@ -102,11 +102,6 @@ public class ReportServiceImpl implements ReportService{
 				Long storyId = Long.parseLong(storyIdStr) + dailyReport.getStoryBaseId().longValue();
 				ZtStory ztStory = this.ztStoryMapper.selectById(storyId);
 				StoryVo storyVo = this.convertStory2Vo(ztStory);
-				// 获取story关联的任务信息
-//				List<ZtTask> ztTasks = this.getTasksByStoryId(storyId);
-//				List<TaskVo> taskVos = ztTasks.stream().map(t -> { return convertTask2Vo(t); }).collect(Collectors.toList());
-//				taskVos.sort(new TaskVoComparator());
-//				storyVo.setUnCloseTasks(taskVos);
 				storyVos.add(storyVo);
 				if (!ztStory.getStage().equals(StoryStage.CLOSED)) {
 					vo.setProcessingStoryNum(vo.getProcessingStoryNum() + 1);
@@ -179,14 +174,6 @@ public class ReportServiceImpl implements ReportService{
 		return vo;
 	}
 	
-//	private List<ZtTask> getTasksByStoryId(Long storyId) {
-//		QueryWrapper<ZtTask> queryWrapper = new QueryWrapper<ZtTask>();
-//		queryWrapper.eq("story", storyId);
-//		queryWrapper.eq("deleted", "0");
-//		queryWrapper.notIn("status", Arrays.asList(TaskStatus.CANCEL, TaskStatus.CLOSED, TaskStatus.DONE));
-//		return this.ztTaskMapper.selectList(queryWrapper);
-//	}
-	
 	private String getUserRealname(String account) {
 		if (account.equals("closed")) {
 			return "-";
@@ -208,9 +195,9 @@ public class ReportServiceImpl implements ReportService{
 	
 	private List<ZtTask> getUnclosedTasks(Set<Long> storyIds) {
 		QueryWrapper<ZtTask> queryWrapper = new QueryWrapper<ZtTask>();
-//		queryWrapper.notIn("story", storyIds);
 		queryWrapper.eq("deleted", "0");
 		queryWrapper.notIn("status", Arrays.asList(TaskStatus.CANCEL, TaskStatus.CLOSED, TaskStatus.DONE));
+		queryWrapper.and(w -> w.notIn("story", storyIds).or().eq("story", 0));
 		return this.ztTaskMapper.selectList(queryWrapper);
 	}
 	
@@ -251,9 +238,9 @@ public class ReportServiceImpl implements ReportService{
 			dailyReport.setReportTitle("[DailyReport]" + ztBuild.getName());
 			
 			//处理story信息
+			List<Long> sotryIds = new ArrayList<Long>();
 			if (StringUtils.isNotEmpty(ztBuild.getStories())) {
 				String[] sotryIdStrs = ztBuild.getStories().split(SEPARATOR);
-				List<Long> sotryIds = new ArrayList<Long>();
 				for (String sotryIdStr : sotryIdStrs) {
 					if (StringUtils.isNotEmpty(sotryIdStr)) {
 						sotryIds.add(Long.parseLong(sotryIdStr));
@@ -263,7 +250,7 @@ public class ReportServiceImpl implements ReportService{
 				dailyReport.setStories(this.convert2CommaStr(sotryIds, dailyReport.getStoryBaseId()));
 			}
 			//处理task信息
-			List<ZtTask> ztTasks = this.getUnclosedTasks(null);
+			List<ZtTask> ztTasks = this.getUnclosedTasks(sotryIds);
 			if (!CollectionUtils.isEmpty(ztTasks)) {
 				List<Long> taskIds = ztTasks.stream().map(t -> { return t.getId(); } ).collect(Collectors.toList());
 				dailyReport.setTaskBaseId(this.getBaseId(taskIds));
