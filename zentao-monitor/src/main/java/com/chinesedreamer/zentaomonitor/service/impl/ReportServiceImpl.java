@@ -193,7 +193,7 @@ public class ReportServiceImpl implements ReportService{
 		return ztUser.getRealName();
 	}
 	
-	private List<ZtTask> getUnclosedTasks(Set<Long> storyIds) {
+	private List<ZtTask> getUnclosedTasks(List<Long> storyIds) {
 		QueryWrapper<ZtTask> queryWrapper = new QueryWrapper<ZtTask>();
 		queryWrapper.eq("deleted", "0");
 		queryWrapper.notIn("status", Arrays.asList(TaskStatus.CANCEL, TaskStatus.CLOSED, TaskStatus.DONE));
