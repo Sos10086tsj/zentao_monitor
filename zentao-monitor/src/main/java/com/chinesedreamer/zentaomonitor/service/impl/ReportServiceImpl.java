@@ -197,7 +197,7 @@ public class ReportServiceImpl implements ReportService{
 		QueryWrapper<ZtTask> queryWrapper = new QueryWrapper<ZtTask>();
 		queryWrapper.eq("deleted", "0");
 		queryWrapper.notIn("status", Arrays.asList(TaskStatus.CANCEL, TaskStatus.CLOSED, TaskStatus.DONE));
-		queryWrapper.and(w -> w.notIn("story", storyIds).or().eq("story", 0));
+		queryWrapper.and(w -> w.in("story", storyIds).or().eq("story", 0));
 		return this.ztTaskMapper.selectList(queryWrapper);
 	}
 	
