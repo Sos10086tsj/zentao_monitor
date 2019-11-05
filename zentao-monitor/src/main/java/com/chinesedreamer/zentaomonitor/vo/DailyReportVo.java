@@ -10,10 +10,10 @@ import lombok.Data;
 @Data
 public class DailyReportVo {
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private Date reportDate;	//报表时间
 	private String reportTitle;
-	@JsonFormat(pattern = "yyyy-MM-dd")
+	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
 	private Date buildDate;
 	
 	private Integer totalStoryNum;		//总需求数

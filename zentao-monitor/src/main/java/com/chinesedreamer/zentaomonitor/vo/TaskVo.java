@@ -16,7 +16,7 @@ public class TaskVo extends BaseZtVo{
 	private String name;
 	private String priorityName;
 	private BigDecimal left;
-	@JsonFormat(pattern = "yyyy-MM-dd")
+	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
 	private Date deadline;
 	private String statusName;
 	private String assignTo;

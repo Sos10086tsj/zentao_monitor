@@ -138,11 +138,13 @@ public class ReportServiceImpl implements ReportService{
 				vo.setUncloseBugs(new ArrayList<BugVo>());
 			}
 			String[] bugIdStrs = dailyReport.getBugs().split(SEPARATOR);
+			vo.setTotalVersionBugNum(bugIdStrs.length);
 			for (String bugIdStr : bugIdStrs) {
 				Long bugId = Long.parseLong(bugIdStr) + dailyReport.getBugBaseId().longValue();
 				ZtBug ztBug = this.ztBugMapper.selectById(bugId);
 				if (!ztBug.getStatus().equals(BugStatus.CLOSED)) {
 					vo.getUncloseBugs().add(this.convertBug2Vo(ztBug));
+					vo.setTotalVersionUncloseBugNum(vo.getTotalVersionUncloseBugNum() + 1);
 				}
 			}
 			vo.getUncloseBugs().sort(new BugVoComparator());
